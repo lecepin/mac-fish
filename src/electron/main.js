@@ -1,16 +1,22 @@
 const electron = require("electron");
-const { app, ipcMain, BrowserWindow, globalShortcut } = electron;
+const { app, ipcMain, BrowserWindow, globalShortcut, Menu } = electron;
 const path = require("path");
-const url = require("url");
 const CONST = require("./../const");
 
 let mainWindow;
 let fishWindow;
 
 // >> App ============================== >>
-app.on("ready", createWindow);
+// 禁用 cmd+q
+Menu.setApplicationMenu(new Menu());
+app.on("ready", () => {
+  createWindow();
+  globalShortcut.register("Command+Shift+M", () => {
+    closeFish();
+  });
+});
 
-app.on("activate", function () {
+app.on("activate", () => {
   if (mainWindow === null) {
     createWindow();
   }
@@ -20,9 +26,6 @@ app.on("will-quit", () => {
   globalShortcut.unregisterAll();
 });
 
-// 不声明，则close 时，同 cmd+Q
-app.on("window-all-closed", function () {});
-
 // >> IPC ============================== >>
 ipcMain.on(CONST.OPEN_FISH, () => {
   mainWindow.minimize();
@@ -31,9 +34,7 @@ ipcMain.on(CONST.OPEN_FISH, () => {
 });
 
 ipcMain.on(CONST.CLOSE_FISH, () => {
-  fishWindow.close();
-  app.dock.show();
-  mainWindow.restore();
+  closeFish();
 });
 
 // >> Window ============================== >>
@@ -50,15 +51,11 @@ function createWindow() {
 
   const startUrl =
     process.env.ELECTRON_START_URL ||
-    url.format({
-      pathname: path.join(__dirname, "/web/index.html"),
-      protocol: "file:",
-      slashes: true,
-    });
+    `file://${path.join(__dirname, "/web/index.html")}`;
   mainWindow.loadURL(startUrl);
   process.env.ELECTRON_START_URL && mainWindow.webContents.openDevTools();
 
-  mainWindow.on("closed", function () {
+  mainWindow.on("closed", () => {
     mainWindow = null;
   });
 }
@@ -78,24 +75,28 @@ function createFishWindow() {
     disableAutoHideCursor: true,
   });
 
-  if (process.env.ELECTRON_START_URL) {
-    fishWindow.webContents.openDevTools();
-  } else {
-    fishWindow.setIgnoreMouseEvents(true, { forward: false });
-  }
+  process.env.ELECTRON_START_URL && fishWindow.webContents.openDevTools();
 
-  const startUrl =
-    process.env.ELECTRON_START_URL + "?fish" ||
-    url.format({
-      pathname: path.join(__dirname, "/web/index.html"),
-      protocol: "file:",
-      slashes: true,
-      query: "fish",
-    });
+  const startUrl = process.env.ELECTRON_START_URL
+    ? process.env.ELECTRON_START_URL + "?fish"
+    : `file://${path.join(__dirname, "/web/index.html")}?fish`;
 
   fishWindow.loadURL(startUrl);
+  setTimeout(() => {
+    fishWindow.focus();
+  }, 2000);
 
-  fishWindow.on("closed", function () {
+  fishWindow.on("closed", () => {
     fishWindow = null;
   });
+}
+
+function closeFish() {
+  if (!fishWindow) {
+    return;
+  }
+
+  fishWindow.close();
+  app.dock.show();
+  mainWindow.restore();
 }
