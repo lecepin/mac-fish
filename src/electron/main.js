@@ -40,8 +40,9 @@ ipcMain.on(CONST.CLOSE_FISH, () => {
 // >> Window ============================== >>
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 600,
+    height: 530,
+    resizable: false,
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false,
