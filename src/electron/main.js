@@ -43,6 +43,7 @@ function createWindow() {
     width: 600,
     height: 530,
     resizable: false,
+    fullscreenable: false,
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false,
@@ -86,6 +87,11 @@ function createFishWindow() {
   setTimeout(() => {
     fishWindow.focus();
   }, 2000);
+
+  // 偶发性 BWindow 切换导致 SimpleFull 错误
+  fishWindow.on("close", () => {
+    fishWindow.setSimpleFullScreen(false);
+  });
 
   fishWindow.on("closed", () => {
     fishWindow = null;
