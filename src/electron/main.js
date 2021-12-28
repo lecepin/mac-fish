@@ -29,8 +29,8 @@ app.on("will-quit", () => {
 // >> IPC ============================== >>
 ipcMain.on(CONST.OPEN_FISH, () => {
   mainWindow.minimize();
-  createFishWindow();
   app.dock.hide();
+  createFishWindow();
 });
 
 ipcMain.on(CONST.CLOSE_FISH, () => {
