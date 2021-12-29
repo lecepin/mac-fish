@@ -1,10 +1,12 @@
 const electron = require("electron");
-const { app, ipcMain, BrowserWindow, globalShortcut, Menu } = electron;
+const { app, ipcMain, BrowserWindow, globalShortcut, Menu, powerSaveBlocker } =
+  electron;
 const path = require("path");
 const CONST = require("./../const");
 
 let mainWindow;
 let fishWindow;
+let powerSaveId;
 
 // >> App ============================== >>
 // 禁用 cmd+q
@@ -14,6 +16,7 @@ app.on("ready", () => {
   globalShortcut.register("Command+Shift+M", () => {
     closeFish();
   });
+  powerSaveId = powerSaveBlocker.start("prevent-display-sleep");
 });
 
 app.on("activate", () => {
@@ -24,6 +27,7 @@ app.on("activate", () => {
 
 app.on("will-quit", () => {
   globalShortcut.unregisterAll();
+  powerSaveBlocker.stop(powerSaveId);
 });
 
 // >> IPC ============================== >>
@@ -54,7 +58,9 @@ function createWindow() {
   const startUrl =
     process.env.ELECTRON_START_URL ||
     `file://${path.join(__dirname, "/web/index.html")}`;
+
   mainWindow.loadURL(startUrl);
+
   process.env.ELECTRON_START_URL && mainWindow.webContents.openDevTools();
 
   mainWindow.on("closed", () => {
