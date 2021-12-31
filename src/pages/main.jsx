@@ -36,12 +36,13 @@ export default class Main extends React.Component {
         <div style={{ position: "absolute", right: 10, top: 8 }}>
           <Button
             onClick={() => {
-              shell.openExternal("https://github.com/lecepin");
+              shell.openExternal("https://github.com/lecepin/mac-fish");
             }}
             icon={<GithubOutlined title="访问Github" />}
-            size="large"
             type="text"
-          ></Button>
+          >
+            源码
+          </Button>
         </div>
         <Form
           labelCol={{ span: 4 }}
